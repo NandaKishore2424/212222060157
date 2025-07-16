@@ -1,0 +1,25 @@
+{
+  "name": "@affordmed/logging-middleware",
+  "version": "1.0.0",
+  "description": "This is a reusable logging middleware for Affordmed assessment for full stack track",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest",
+    "dev": "nodemon src/index.js"
+  },
+  "keywords": [
+    "logging",
+    "middleware",
+    "affordmed"
+  ],
+  "author": "Nanda Kishore R",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.10.0",
+    "dotenv": "^17.2.0"
+  },
+  "devDependencies": {
+    "jest": "^30.0.4",
+    "nodemon": "^3.1.10"
+  }
+}
