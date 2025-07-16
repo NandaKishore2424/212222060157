@@ -2,9 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const urlRoutes = require('./routes/urlRoutes');
 const requestLogger = require('./middleware/requestLogger');
 const AppLogger = require('./utils/logger');
+const urlRoutes = require('./routes/urlRoutes');
+const UrlController = require('./controllers/UrlController');
 
 const app = express();
 
@@ -25,13 +26,15 @@ app.get('/health', async (req, res) => {
   });
 });
 
-app.use('/', urlRoutes);
+app.use('/shorturls', urlRoutes);
+
+app.get('/:shortcode([a-zA-Z0-9]+)', UrlController.redirectToOriginal);
 
 app.use('*', async (req, res) => {
   await AppLogger.warn('route', `route not found: ${req.originalUrl}`);
   res.status(404).json({
     error: 'Route is not found',
-    message: 'The endpoint you asked for is not existinng'
+    message: 'The endpoint you asked for is not existing'
   });
 });
 

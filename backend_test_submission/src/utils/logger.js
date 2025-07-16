@@ -1,4 +1,6 @@
-import { Logger } from '../../../Logging Middleware/src/index';
+const { Logger } = require('../../../Logging Middleware/src/index');
+const fs = require('fs');
+const path = require('path');
 
 const config = {
   baseURL: 'http://20.244.56.144/evaluation-service',
@@ -6,32 +8,77 @@ const config = {
   tokenType: 'Bearer'
 };
 
-const logger = new Logger(config);
+let logger;
+try {
+  logger = new Logger(config);
+} catch (error) {
+  console.error('Failed to initialize logger:', error.message);
+}
+
+const logToFile = (level, packageName, message) => {
+  const timestamp = new Date().toISOString();
+  const logDir = path.join(__dirname, '../../logs');
+  
+  if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true });
+  }
+  
+  const logFile = path.join(logDir, `app-${new Date().toISOString().split('T')[0]}.log`);
+  const logMessage = `[${timestamp}] [${level.toUpperCase()}] [${packageName}] ${message}\n`;
+  
+  fs.appendFileSync(logFile, logMessage);
+  console.log(`[${level.toUpperCase()}] [${packageName}] ${message}`);
+};
 
 class AppLogger {
   static async info(packageName, message) {
     try {
-      await logger.info('frontend', packageName, message);
+      if (logger) {
+        await logger.info('backend', packageName, message);
+      } else {
+        logToFile('info', packageName, message);
+      }
     } catch (error) {
-      console.error('Logging failed:', error.message);
+      logToFile('info', packageName, message);
+      console.error('Remote logging failed, using local log file instead');
     }
   }
 
   static async warn(packageName, message) {
     try {
-      await logger.warn('frontend', packageName, message);
+      if (logger) {
+        await logger.warn('backend', packageName, message);
+      } else {
+        logToFile('warn', packageName, message);
+      }
     } catch (error) {
-      console.error('Logging failed:', error.message);
+      logToFile('warn', packageName, message);
     }
   }
 
   static async error(packageName, message) {
     try {
-      await logger.error('frontend', packageName, message);
+      if (logger) {
+        await logger.error('backend', packageName, message);
+      } else {
+        logToFile('error', packageName, message);
+      }
     } catch (error) {
-      console.error('Logging failed:', error.message);
+      logToFile('error', packageName, message);
+    }
+  }
+
+  static async fatal(packageName, message) {
+    try {
+      if (logger) {
+        await logger.fatal('backend', packageName, message);
+      } else {
+        logToFile('fatal', packageName, message);
+      }
+    } catch (error) {
+      logToFile('fatal', packageName, message);
     }
   }
 }
 
-export default AppLogger;
+module.exports = AppLogger;
